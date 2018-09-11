@@ -76,7 +76,7 @@ pipeline {
             steps {
                 script{
                     def helper = load 'shared-library.groovy'
-                    helper.applyAnsibleInventory( "${APPLIER_TARGET}", 'python-deploy-dev' )
+                    helper.applyAnsibleInventory( "${APPLIER_TARGET}", 'amq-deploy-dev' )
                     timeout(5) { // in minutes
                         openshift.loglevel(3)
                         helper.promoteImageWithinCluster( "${APP_NAME}", "${CI_CD_NAMESPACE}", "${DEV_NAMESPACE}", "${JENKINS_TAG}" )
@@ -99,7 +99,7 @@ pipeline {
                 }
                 script{
                     def helper = load 'shared-library.groovy'
-                    helper.applyAnsibleInventory( "${APPLIER_TARGET}", 'python-deploy-test' )
+                    helper.applyAnsibleInventory( "${APPLIER_TARGET}", 'amq-deploy-test' )
                     timeout(10) { // in minutes
                         helper.promoteImageWithinCluster( "${APP_NAME}", "${CI_CD_NAMESPACE}", "${TEST_NAMESPACE}", "${JENKINS_TAG}" )
                         // the new client is having random failures

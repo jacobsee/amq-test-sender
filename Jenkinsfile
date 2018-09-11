@@ -1,0 +1,115 @@
+pipeline {
+
+    agent {
+        label "master"
+    }
+
+    environment {
+        // Global Vars
+        CI_CD_NAMESPACE = "cab-it-ci-cd"
+        DEV_NAMESPACE = "cab-it-dev"
+        TEST_NAMESPACE = "cab-it-test"
+
+        APP_NAME = "amq-test"
+        APPLY_PLAYBOOK_NAME = "apply.yml"
+        APPLIER_TARGET = "apps"
+        SOURCE_CONTEXT_DIR = "" // probably not needed
+
+        JENKINS_TAG = "${JOB_NAME}.${BUILD_NUMBER}".replace("/", "-")
+
+        NEXUS_SERVICE_HOST = 'nexus'
+        NEXUS_SERVICE_PORT = '8081'
+
+        OCP_API_SERVER = "${OPENSHIFT_API_URL}"
+        OCP_TOKEN = readFile('/var/run/secrets/kubernetes.io/serviceaccount/token').trim()
+
+        QPID_VERSION = '1.37.0'
+        QPID_URL = 'http://apache.mirrors.lucidnetworks.net/qpid/python/${QPID_VERSION}/qpid-python-${QPID_VERSION}.tar.gz'
+
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr:'10'))
+        timeout(time: 15, unit: 'MINUTES')
+        ansiColor('xterm')
+        timestamps()
+    }
+
+    stages {
+        stage("Test and Build") {
+            agent {
+                node {
+                    label "jenkins-slave-python"  
+                }
+            }
+            steps {
+                sh '''
+                    wget ${QPID_URL}
+                    export PYTHONPATH=$PWD/qpid-python-${QPID_VERSION}:$PYTHONPATH
+                    ls -al
+                    python -m virtualenv env
+                    source env/bin/activate
+                    pip install -r requirements.txt
+                    // python setup.py test
+                    python setup.py egg_info --tag-build=${BUILD_NUMBER} sdist bdist_wheel 
+                    twine upload -u admin -p admin123 --repository-url http://${NEXUS_SERVICE_HOST}:${NEXUS_SERVICE_PORT}/repository/pypi-internal/ dist/amq-test-app-0.0.${BUILD_NUMBER}.tar.gz
+                '''
+            }
+        }
+
+        stage("Bake Image") {
+            steps {
+                script{
+                    def helper = load 'app/shared-library.groovy'
+                    helper.patchBuildConfigOutputLabels(env)
+
+                    openshift.withCluster () {
+                        def buildSelector = openshift.startBuild( "${APP_NAME}" )
+                        buildSelector.logs('-f')
+                    }
+                }
+            }
+        }
+ 
+        stage('Deploy: Dev'){
+            agent { label 'jenkins-slave-ansible'}
+            steps {
+                script{
+                    def helper = load 'app/shared-library.groovy'
+                    helper.app lyAnsibleInventory( "${APPLIER_TARGET}", 'python-deploy-dev' )
+                    timeout(5) { // in minutes
+                        openshift.loglevel(3)
+                        helper.promoteImageWithinCluster( "${APP_NAME}", "${CI_CD_NAMESPACE}", "${DEV_NAMESPACE}", "${JENKINS_TAG}" )
+                        helper.verifyDeployment("${APP_NAME}", "${DEV_NAMESPACE}")
+                    }
+                }
+            }
+        }
+
+        stage('Deploy: Test'){
+            agent { label 'jenkins-slave-ansible'}
+            options {
+                timeout(time: 1, unit: 'HOURS')
+            }
+            steps {
+                script {
+                    // slackSend "${env.APP_NAME} Input requested - ${JOB_NAME} ${BUILD_NUMBER} (<${BUILD_URL}|Open>)"
+                    input message: 'Deploy to Test?'
+
+                }
+                script{
+                    def helper = load 'app/shared-library.groovy'
+                    helper.applyAnsibleInventory( "${APPLIER_TARGET}", 'python-deploy-test' )
+                    timeout(10) { // in minutes
+                        helper.promoteImageWithinCluster( "${APP_NAME}", "${CI_CD_NAMESPACE}", "${TEST_NAMESPACE}", "${JENKINS_TAG}" )
+                        // the new client is having random failures
+                        helper.verifyDeployment("${APP_NAME}", "${TEST_NAMESPACE}")
+                    }
+                }
+
+                // slackSend color: "good", message: ":success: ${APP_NAME} Build Completed - ${JOB_NAME} ${BUILD_NUMBER} (<${BUILD_URL}|Open>)"
+
+            }
+        }
+    }
+}

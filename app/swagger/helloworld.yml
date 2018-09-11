@@ -1,0 +1,30 @@
+swagger: "2.0"
+
+info:
+  title: "{{title}}"
+  version: "1.0"
+  description: AMQ Hello World
+  contact:
+    name: Jacob See
+    url: http://no-url.com
+    email: jasee@redhat.com
+  license:
+    name: GNU GPLv3
+    url: https://www.gnu.org/licenses/gpl.txt
+
+basePath: "/"
+
+paths:
+  /helloworld:
+    get:
+      operationId: app.api.say_hi
+      description: Say hello to the world
+      produces:
+        - text/plain;
+      responses:
+        200:
+          description: Hello World
+          schema:
+            type: string
+          examples:
+            "text/plain": "1"

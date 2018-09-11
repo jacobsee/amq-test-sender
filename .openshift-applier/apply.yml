@@ -1,0 +1,10 @@
+---
+- name: Build and Deploy amq-test
+  hosts: app
+  vars:
+    ci_cd_namespace: cab-it-ci-cd
+    dev_namespace: cab-it-dev
+    test_namespace: cab-it-test
+  tasks:
+    - include_role:
+        name: openshift-applier/roles/openshift-applier

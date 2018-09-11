@@ -75,7 +75,7 @@ pipeline {
             agent { label 'jenkins-slave-ansible'}
             steps {
                 script{
-                    def helper = load 'app/shared-library.groovy'
+                    def helper = load 'shared-library.groovy'
                     helper.applyAnsibleInventory( "${APPLIER_TARGET}", 'python-deploy-dev' )
                     timeout(5) { // in minutes
                         openshift.loglevel(3)
@@ -98,7 +98,7 @@ pipeline {
 
                 }
                 script{
-                    def helper = load 'app/shared-library.groovy'
+                    def helper = load 'shared-library.groovy'
                     helper.applyAnsibleInventory( "${APPLIER_TARGET}", 'python-deploy-test' )
                     timeout(10) { // in minutes
                         helper.promoteImageWithinCluster( "${APP_NAME}", "${CI_CD_NAMESPACE}", "${TEST_NAMESPACE}", "${JENKINS_TAG}" )

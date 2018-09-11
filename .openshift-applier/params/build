@@ -1,2 +1,6 @@
+PIPELINE_SOURCE_REPOSITORY_URL=https://github.com/jacobsee/amq-test-sender
+PIPELINE_SOURCE_REPOSITORY_REF=add-openshift-applier
 NAME=amq-test
-BUILD_TAG=latest
+S2I_BASE_IMAGE=python:3.6
+GIT_SOURCE_REF=add-openshift-applier
+GIT_SOURCE_URI=https://github.com/jacobsee/amq-test-sender.git

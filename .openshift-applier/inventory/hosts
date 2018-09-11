@@ -1,2 +1,2 @@
-[app]
-localhost ansible_connection=local
+[apps]
+app-build-deploy

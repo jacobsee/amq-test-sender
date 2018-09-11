@@ -1,36 +1,15 @@
----
-openshift_cluster_content:
-- object: app-builds
-  content:
-  - name: cab-it-build
-    template: "{{ playbook_dir }}/templates/cab-it-build.yml"
-    params: "{{ playbook_dir }}/params/build"
-    namespace: "{{ ci_cd_namespace }}"
-    tags:
-    - build
-- object: deploy-dev
-  content:
-  - name:  cab-it
-    template: "{{ playbook_dir }}/templates/cab-it-deploy.yml"
-    params: "{{ playbook_dir }}/params/dev"
-    namespace: "{{ dev_namespace }}"
-    tags:
-    - deploy
-    - dev
-- object: deploy-test
-  content:
-  - name:  cab-it
-    template: "{{ playbook_dir }}/templates/cab-it-deploy.yml"
-    params: "{{ playbook_dir }}/params/test"
-    namespace: "{{ test_namespace }}"
-    tags:
-    - deploy
-    - test
-- object: cab-it-pipeline
-  content:
-  - name: cab-it-pipeline
-    template: "{{ playbook_dir }}/templates/ocp-pipeline.yml"
-    params: "{{ playbook_dir }}/params/ocp-pipeline"
-    namespace: "{{ ci_cd_namespace }}"
-    tags:
-    - pipeline
+ci_cd:
+  NAMESPACE: cab-it-ci-cd
+  NAMESPACE_DISPLAY_NAME: "CI/CD"
+  
+dev:
+  NAMESPACE: cab-it-dev
+  NAMESPACE_DISPLAY_NAME: "Cab-It-Development"
+
+test:
+  NAMESPACE: cab-it-test
+  NAMESPACE_DISPLAY_NAME: "Cab-It-Test"
+
+role_binding_group:
+  GROUP: "{{ ci_cd.NAMESPACE }}-contributors"
+  ROLE: edit

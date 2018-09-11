@@ -2,9 +2,9 @@
 kind: Template
 apiVersion: v1
 metadata:
-  name: cab-it-deploy
+  name: http-app-deploy
   annotations:
-    openshift.io/display-name: Static App Deploy Template
+    openshift.io/display-name: HTTP App Deploy Template
     description: A template to deploy your an App with a HTTP endpoint
     iconClass: icon-cube
     tags: http
@@ -38,31 +38,37 @@ objects:
       type: Rolling
     template:
       metadata:
-        creationTimestamp:
         labels:
           name: "${NAME}"
       spec:
         containers:
-        - image: "docker-registry.default.svc:5000/${NAMESPACE}/${NAME}:${APP_TAG}"
+        - image: "${NAME}"
           imagePullPolicy: Always
           name: "${NAME}"
           ports:
+          - containerPort: 8778
+            protocol: TCP
           - containerPort: 8080
+            protocol: TCP
+          - containerPort: 8443
             protocol: TCP
           resources: {}
           terminationMessagePath: "/dev/termination-log"
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 8080
-            initialDelaySeconds: 10
-            timeoutSeconds: 1
         dnsPolicy: ClusterFirst
         restartPolicy: Always
         securityContext: {}
         terminationGracePeriodSeconds: 30
     test: false
-    triggers: []
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - "${NAME}"
+        from:
+          kind: ImageStreamTag
+          name: "${NAME}:latest"
+      type: ImageChange
 - apiVersion: v1
   kind: Service
   metadata:
@@ -75,6 +81,14 @@ objects:
       port: 8080
       protocol: TCP
       targetPort: 8080
+    - name: 8443-tcp
+      port: 8443
+      protocol: TCP
+      targetPort: 8443
+    - name: 8778-tcp
+      port: 8778
+      protocol: TCP
+      targetPort: 8778
     selector:
       name: "${NAME}"
     sessionAffinity: None
@@ -93,38 +107,10 @@ objects:
       name: "${NAME}"
       weight: 100
     wildcardPolicy: None
-- apiVersion: v1
-  kind: RoleBinding
-  metadata:
-    name: edit
-  roleRef:
-    name: edit
-  subjects:
-  - kind: ServiceAccount
-    name: jenkins
-    namespace: "${PIPELINES_NAMESPACE}"
-  userNames:
-  - system:serviceaccount:${PIPELINES_NAMESPACE}:${DEPLOYER_USER}
 parameters:
 - name: NAME
   displayName: Name
   description: The name assigned to all objects and the related imagestream.
   required: true
-- name: APP_TAG
-  displayName: App Tag
-  description: The tag of the image to use eg latest.
-  required: true
-- name: NAMESPACE
-  displayName: Docker image namespace
-  description: The namespace of the image to use eg js-apps.
-  required: true
-- name: DEPLOYER_USER
-  displayName: Deployer User
-  description: The name to the serviceaccount user for deploying apps eg jenkins
-  required: true
-- name: PIPELINES_NAMESPACE
-  displayName: Project/Namespace for Jenkins Pipelines
-  description: The project/namespace where the Jenkins executing pipelines is deployed.
-  required: true
 labels:
-  template: cab-it-deploy-template
+  template: http-app-deploy-template

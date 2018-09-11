@@ -1,0 +1,34 @@
+
+---
+ansible_connection: local
+
+deploy:
+  NAME: python-app
+
+openshift_cluster_content:
+- object: app-builds
+  content:
+  - name: amq-test-build-test
+    template: "{{ playbook_dir }}/templates/s2i-app-build/source-template-no-secrets.yml"
+    params: "{{ playbook_dir }}/params/build"
+    namespace: "{{ ci_cd.NAMESPACE }}"
+    tags:
+    - python-build
+- object: app-deploy-dev
+  content:
+  - name: amq-test
+    template: "{{ playbook_dir }}/templates/http-app-deploy/template.yml"
+    params_from_vars: "{{ deploy }}"
+    namespace: "{{ dev.NAMESPACE }}"
+    tags:
+    - python-deploy
+    - python-deploy-dev
+- object: app-deploy-test
+  content:
+  - name: amq-test
+    template: "{{ playbook_dir }}/templates/http-app-deploy/template.yml"
+    params_from_vars: "{{ deploy }}"
+    namespace: "{{ test.NAMESPACE }}"
+    tags:
+    - python-deploy
+    - python-deploy-test

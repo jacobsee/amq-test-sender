@@ -60,7 +60,7 @@ pipeline {
         stage("Bake Image") {
             steps {
                 script{
-                    def helper = load 'app/shared-library.groovy'
+                    def helper = load 'shared-library.groovy'
                     helper.patchBuildConfigOutputLabels(env)
 
                     openshift.withCluster () {

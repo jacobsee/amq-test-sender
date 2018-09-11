@@ -76,7 +76,7 @@ pipeline {
             steps {
                 script{
                     def helper = load 'app/shared-library.groovy'
-                    helper.app lyAnsibleInventory( "${APPLIER_TARGET}", 'python-deploy-dev' )
+                    helper.applyAnsibleInventory( "${APPLIER_TARGET}", 'python-deploy-dev' )
                     timeout(5) { // in minutes
                         openshift.loglevel(3)
                         helper.promoteImageWithinCluster( "${APP_NAME}", "${CI_CD_NAMESPACE}", "${DEV_NAMESPACE}", "${JENKINS_TAG}" )

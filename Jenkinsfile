@@ -24,7 +24,7 @@ pipeline {
         OCP_TOKEN = readFile('/var/run/secrets/kubernetes.io/serviceaccount/token').trim()
 
         QPID_VERSION = '1.37.0'
-        QPID_URL = 'http://apache.mirrors.lucidnetworks.net/qpid/python/${QPID_VERSION}/qpid-python-${QPID_VERSION}.tar.gz'
+        QPID_URL = "http://apache.mirrors.lucidnetworks.net/qpid/python/${QPID_VERSION}/qpid-python-${QPID_VERSION}.tar.gz"
 
     }
 

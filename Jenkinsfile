@@ -50,7 +50,7 @@ pipeline {
                     python -m virtualenv env
                     source env/bin/activate
                     pip install -r requirements.txt
-                    // python setup.py test
+                    # python setup.py test
                     python setup.py egg_info --tag-build=${BUILD_NUMBER} sdist bdist_wheel 
                     twine upload -u admin -p admin123 --repository-url http://${NEXUS_SERVICE_HOST}:${NEXUS_SERVICE_PORT}/repository/pypi-internal/ dist/amq-test-app-0.0.${BUILD_NUMBER}.tar.gz
                 '''

@@ -3,7 +3,7 @@
 ansible_connection: local
 
 deploy:
-  NAME: python-app
+  NAME: amq-test
 
 openshift_cluster_content:
 - object: app-builds

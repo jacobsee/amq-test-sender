@@ -1,6 +1,6 @@
 ---
 - name: Build and Deploy amq-test
-  hosts: apps
+  hosts: '{{ target }}' 
   vars:
     ci_cd_namespace: cab-it-ci-cd
     dev_namespace: cab-it-dev

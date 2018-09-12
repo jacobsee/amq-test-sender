@@ -1,2 +1,5 @@
 [apps]
 app-build-deploy
+
+[amq-broker]
+amq-broker

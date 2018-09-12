@@ -1,0 +1,67 @@
+---
+ansible_connection: local
+
+amq_init_vars:
+  APPLICATION_NAME: broker
+  AMQ_USER: admin
+  AMQ_PASSWORD: admin
+  AMQ_QUEUES: test_queue
+
+openshift_cluster_content:
+- object: amq-broker-imagestream
+  content:
+  - name: amq-broker-imagestream
+    file: "https://raw.githubusercontent.com/jboss-container-images/jboss-amq-7-broker-openshift-image/71-1.0.TP/amq-broker-7-image-streams.yaml"
+    namespace: "{{ dev.NAMESPACE }}"
+    tags:
+    - amq-broker
+    - amq-broker-imagestream
+- object: amq-broker-71-basic-template
+  content:
+  - name: amq-broker-71-basic-template
+    file: "https://raw.githubusercontent.com/jboss-container-images/jboss-amq-7-broker-openshift-image/71-1.0.TP/templates/amq-broker-71-basic.yaml"
+    namespace: "{{ dev.NAMESPACE }}"
+    tags:
+    - amq-broker
+    - amq-broker-template
+- object: amq-broker-71-ssl-template
+  content:
+  - name: amq-broker-71-ssl-template
+    file: "https://raw.githubusercontent.com/jboss-container-images/jboss-amq-7-broker-openshift-image/71-1.0.TP/templates/amq-broker-71-ssl.yaml"
+    namespace: "{{ dev.NAMESPACE }}"
+    tags:
+    - amq-broker
+    - amq-broker-template
+- object: amq-broker-71-persistence
+  content:
+  - name: amq-broker-71-persistence
+    file: "https://raw.githubusercontent.com/jboss-container-images/jboss-amq-7-broker-openshift-image/71-1.0.TP/templates/amq-broker-71-persistence.yaml"
+    namespace: "{{ dev.NAMESPACE }}"
+    tags:
+    - amq-broker
+    - amq-broker-template
+- object: amq-broker-71-persistence-ssl
+  content:
+  - name: amq-broker-71-persistence-ssl
+    file: "https://raw.githubusercontent.com/jboss-container-images/jboss-amq-7-broker-openshift-image/71-1.0.TP/templates/amq-broker-71-persistence-ssl.yaml"
+    namespace: "{{ dev.NAMESPACE }}"
+    tags:
+    - amq-broker
+    - amq-broker-template
+- object: amq-broker-71-statefulset-clustered
+  content:
+  - name: amq-broker-71-statefulset-clustered
+    file: "https://raw.githubusercontent.com/jboss-container-images/jboss-amq-7-broker-openshift-image/71-1.0.TP/templates/amq-broker-71-statefulset-clustered.yaml"
+    namespace: "{{ dev.NAMESPACE }}"
+    tags:
+    - amq-broker
+    - amq-broker-template
+- object: amq-broker-simple-deployment
+  content:
+  - name: amq-broker-71
+    template: "https://raw.githubusercontent.com/jboss-container-images/jboss-amq-7-broker-openshift-image/71-1.0.TP/templates/amq-broker-71-basic.yaml"
+    params_from_vars: "{{ amq_init_vars }}"
+    namespace: "{{ dev.NAMESPACE }}"
+    tags:
+    - amq-broker
+    - amq-broker-deployment

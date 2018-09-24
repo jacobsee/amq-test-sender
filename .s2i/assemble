@@ -1,0 +1,16 @@
+#!/bin/bash
+
+echo "Running pre-assemble steps"
+
+yum -y install redhat-rpm-config
+
+/usr/libexec/s2i/assemble
+rc=$?
+
+if [ $rc -eq 0 ]; then
+    echo "Assemble succeeded!"
+else
+    echo "Assemble failed."
+fi
+
+exit $rc

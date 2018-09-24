@@ -18,6 +18,7 @@ more-itertools==4.3.0
 pluggy==0.7.1
 py==1.6.0
 pytest==3.8.0
+python-qpid-proton==0.24.0
 PyYAML==3.13
 requests==2.19.1
 six==1.11.0
